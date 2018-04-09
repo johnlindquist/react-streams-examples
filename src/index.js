@@ -1,16 +1,15 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps } from "react-streams"
+import { map } from "rxjs/operators"
 
-const HelloWorld = pipeProps()
+const OperatorExample = pipeProps(
+  map(props => ({ message: `${props.message} example` }))
+)
 
 render(
-  <HelloWorld greeting="Hello" name="react-streams">
-    {props => (
-      <h1>
-        {props.greeting}, {props.name}
-      </h1>
-    )}
-  </HelloWorld>,
+  <OperatorExample message="Operator">
+    {props => <div>{props.message}</div>}
+  </OperatorExample>,
   document.querySelector("#root")
 )
