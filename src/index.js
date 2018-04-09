@@ -1,24 +1,32 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps, sourceNext } from "react-streams"
-import { map, startWith, pluck, switchMap } from "rxjs/operators"
+import { map, pluck, startWith, switchMap } from "rxjs/operators"
 
-const TypingDemo = pipeProps(
-  pluck("text"),
-  switchMap(text => {
-    const [input$, onInput] = sourceNext(pluck("target", "value"))
+const ToggleCheckbox = pipeProps(
+  pluck("checked"),
+  switchMap(checked => {
+    const [change$, onChange] = sourceNext(pluck("target", "checked"))
 
-    return input$.pipe(startWith(text), map(text => ({ text, onInput })))
+    return change$.pipe(
+      startWith(checked),
+      map(checked => ({ checked, onChange }))
+    )
   })
 )
+
 render(
-  <TypingDemo text="Text from props">
+  <ToggleCheckbox checked={true}>
     {props => (
       <div>
-        <input placeholder={props.text} onInput={props.onInput} />
-        <h1>{props.text}</h1>
+        <input
+          type="checkbox"
+          onChange={props.onChange}
+          checked={props.checked}
+        />
+        <h1>{props.checked ? "ON" : "OFF"}</h1>
       </div>
     )}
-  </TypingDemo>,
+  </ToggleCheckbox>,
   document.querySelector("#root")
 )
