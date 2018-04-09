@@ -1,15 +1,12 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps } from "react-streams"
+import { interval } from "rxjs"
 import { map } from "rxjs/operators"
 
-const OperatorExample = pipeProps(
-  map(props => ({ message: `${props.message} example` }))
-)
+const Timer = pipeProps(() => interval(1000).pipe(map(tick => ({ tick }))))
 
 render(
-  <OperatorExample message="Operator">
-    {props => <div>{props.message}</div>}
-  </OperatorExample>,
+  <Timer>{props => <h1>{props.tick}</h1>}</Timer>,
   document.querySelector("#root")
 )
