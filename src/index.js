@@ -1,26 +1,34 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps } from "react-streams"
-import { interval } from "rxjs"
-import { map, pluck } from "rxjs/operators"
+import { of } from "rxjs"
+import { pluck, switchMap, map, catchError } from "rxjs/operators"
+import { ajax } from "rxjs/ajax"
 
-const Timer = pipeProps(() => interval(250), map(tick => ({ tick })))
+const URL = `https://azure-lipstick.glitch.me/`
 
-const PropsStreamingDemo = pipeProps(
-  pluck("number"),
-  map(number => ({ number: number * 2 }))
+const Success = props => (
+  <div>
+    <h1>{props.name}</h1>
+    <img src={URL + props.image} alt={props.name} />
+  </div>
 )
 
-render(
-  <Timer>
-    {props => (
-      <div>
-        <h1>{props.tick}</h1>
-        <PropsStreamingDemo number={props.tick}>
-          {props2 => <h1>{props2.number}</h1>}
-        </PropsStreamingDemo>
-      </div>
-    )}
-  </Timer>,
-  document.querySelector("#root")
+const Fail = err =>
+  of(
+    <div>
+      <h1>Failed!!!!</h1>
+      <img src={URL + "darth_vader.jpg"} alt="FAILED" />
+    </div>
+  )
+
+const CatchDemo = pipeProps(
+  map(({ url, person }) => `${url}people/${person}`),
+  switchMap(ajax),
+  pluck("response"),
+  map(Success),
+  catchError(Fail)
 )
+
+//change the person to an invalid # to force an error
+render(<CatchDemo url={URL} person={3333} />, document.querySelector("#root"))
