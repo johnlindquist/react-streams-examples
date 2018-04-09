@@ -1,26 +1,24 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps, sourceNext } from "react-streams"
-import { map, scan, startWith } from "rxjs/operators"
+import { map, startWith, pluck, switchMap } from "rxjs/operators"
 
-const Counter = pipeProps(() => {
-  const [click$, onClick] = sourceNext()
+const TypingDemo = pipeProps(
+  pluck("text"),
+  switchMap(text => {
+    const [input$, onInput] = sourceNext(pluck("target", "value"))
 
-  return click$.pipe(
-    startWith(0),
-    scan(count => count + 1),
-    map(count => ({ count, onClick }))
-  )
-})
-
+    return input$.pipe(startWith(text), map(text => ({ text, onInput })))
+  })
+)
 render(
-  <Counter>
+  <TypingDemo text="Text from props">
     {props => (
       <div>
-        <h1>{props.count}</h1>
-        <button onClick={props.onClick}>+</button>
+        <input placeholder={props.text} onInput={props.onInput} />
+        <h1>{props.text}</h1>
       </div>
     )}
-  </Counter>,
+  </TypingDemo>,
   document.querySelector("#root")
 )
