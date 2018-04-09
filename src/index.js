@@ -1,32 +1,26 @@
 import React from "react"
 import { render } from "react-dom"
-import { pipeProps, sourceNext } from "react-streams"
-import { map, pluck, startWith, switchMap } from "rxjs/operators"
+import { pipeProps } from "react-streams"
+import { interval } from "rxjs"
+import { map, pluck } from "rxjs/operators"
 
-const ToggleCheckbox = pipeProps(
-  pluck("checked"),
-  switchMap(checked => {
-    const [change$, onChange] = sourceNext(pluck("target", "checked"))
+const Timer = pipeProps(() => interval(250), map(tick => ({ tick })))
 
-    return change$.pipe(
-      startWith(checked),
-      map(checked => ({ checked, onChange }))
-    )
-  })
+const PropsStreamingDemo = pipeProps(
+  pluck("number"),
+  map(number => ({ number: number * 2 }))
 )
 
 render(
-  <ToggleCheckbox checked={true}>
+  <Timer>
     {props => (
       <div>
-        <input
-          type="checkbox"
-          onChange={props.onChange}
-          checked={props.checked}
-        />
-        <h1>{props.checked ? "ON" : "OFF"}</h1>
+        <h1>{props.tick}</h1>
+        <PropsStreamingDemo number={props.tick}>
+          {props2 => <h1>{props2.number}</h1>}
+        </PropsStreamingDemo>
       </div>
     )}
-  </ToggleCheckbox>,
+  </Timer>,
   document.querySelector("#root")
 )
