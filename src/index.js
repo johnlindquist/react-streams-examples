@@ -6,7 +6,7 @@ import { map, scan, startWith } from "rxjs/operators"
 const Counter = pipeProps(() => {
   const onClick = source()
 
-  return click$.pipe(
+  return onClick.pipe(
     startWith(0),
     scan(count => count + 1),
     map(count => ({ count, onClick }))
