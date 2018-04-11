@@ -11,6 +11,7 @@ const TypingDemo = pipeProps(
     return onInput.pipe(startWith(text), map(text => ({ text, onInput })))
   })
 )
+
 render(
   <TypingDemo text="Text from props">
     {props => (
