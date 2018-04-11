@@ -1,10 +1,10 @@
 import React from "react"
 import { render } from "react-dom"
-import { pipeProps, sourceNext } from "react-streams"
+import { pipeProps, source } from "react-streams"
 import { map, scan, startWith } from "rxjs/operators"
 
 const Counter = pipeProps(() => {
-  const [click$, onClick] = sourceNext()
+  const onClick = source()
 
   return click$.pipe(
     startWith(0),
