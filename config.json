@@ -1,12 +1,36 @@
 {
   "chapters": [
     {
-      "slug": "streams",
-      "title": "streams",
+      "slug": "intro",
+      "title": "intro",
       "lessons": [
         {
           "slug": "master",
           "branch": "master"
+        }
+      ]
+    },
+    {
+      "slug": "source",
+      "title": "source",
+      "lessons": [
+        {
+          "slug": "source",
+          "branch": "source"
+        }
+      ]
+    },
+    {
+      "slug": "ajax",
+      "title": "ajax",
+      "lessons": [
+        {
+          "slug": "ajax",
+          "branch": "ajax"
+        },
+        {
+          "slug": "catch-errors",
+          "branch": "catch-errors"
         }
       ]
     }
