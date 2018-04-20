@@ -1,6 +1,7 @@
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps, source } from "react-streams"
+import { from } from "rxjs"
 import { map, pluck, startWith, switchMap } from "rxjs/operators"
 
 const ToggleCheckbox = pipeProps(
@@ -8,7 +9,7 @@ const ToggleCheckbox = pipeProps(
   switchMap(checked => {
     const onChange = source(pluck("target", "checked"))
 
-    return onChange.pipe(
+    return from(onChange).pipe(
       startWith(checked),
       map(checked => ({ checked, onChange }))
     )
