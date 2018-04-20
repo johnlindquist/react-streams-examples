@@ -1,0 +1,196 @@
+{
+  "chapters": [
+    {
+      "slug": "intro",
+      "title": "Intro",
+      "lessons": [
+        {
+          "slug": "hello",
+          "branch": "master"
+        },
+        {
+          "slug": "no-jsx",
+          "branch": "no-jsx"
+        },
+        {
+          "slug": "pure-component",
+          "branch": "pure-component"
+        },
+        {
+          "slug": "pass-props",
+          "branch": "pass-props"
+        },
+        {
+          "slug": "class-component",
+          "branch": "class-component"
+        },
+        {
+          "slug": "prop-types",
+          "branch": "prop-types"
+        },
+        {
+          "slug": "default-props",
+          "branch": "default-props"
+        },
+        {
+          "slug": "map",
+          "branch": "map"
+        },
+        {
+          "slug": "sort",
+          "branch": "sort"
+        },
+        {
+          "slug": "conditional-render",
+          "branch": "conditional-render"
+        }
+      ]
+    },
+    {
+      "slug": "styles",
+      "title": "Styles",
+      "lessons": [
+        {
+          "slug": "inline-styles",
+          "branch": "inline-styles"
+        },
+        {
+          "slug": "className",
+          "branch": "className"
+        },
+        {
+          "slug": "css-in-js",
+          "branch": "css-in-js"
+        }
+      ]
+    },
+    {
+      "slug": "forms",
+      "title": "Forms",
+      "lessons": [
+        {
+          "slug": "react-forms",
+          "branch": "react-forms"
+        },
+        {
+          "slug": "validate",
+          "branch": "validate"
+        },
+        {
+          "slug": "submit",
+          "branch": "submit"
+        }
+      ]
+    },
+    {
+      "slug": "navigation",
+      "title": "Navigation",
+      "lessons": [
+        {
+          "slug": "router",
+          "branch": "router"
+        }
+      ]
+    },
+    {
+      "slug": "state",
+      "title": "State",
+      "lessons": [
+        {
+          "slug": "state",
+          "branch": "state"
+        },
+        {
+          "slug": "state-object-vs-function",
+          "branch": "state-object-vs-function"
+        },
+        {
+          "slug": "set-state-null",
+          "branch": "set-state-null"
+        },
+        {
+          "slug": "function-as-child",
+          "branch": "function-as-child"
+        },
+        {
+          "slug": "counter",
+          "branch": "counter"
+        },
+        {
+          "slug": "fetch",
+          "branch": "fetch"
+        },
+        {
+          "slug": "spinner",
+          "branch": "spinner"
+        },
+        {
+          "slug": "compound-components",
+          "branch": "compound-components"
+        }
+      ]
+    },
+    {
+      "slug": "context",
+      "title": "Context",
+      "lessons": [
+        {
+          "slug": "context",
+          "branch": "context"
+        },
+        {
+          "slug": "context-provider",
+          "branch": "context-provider"
+        },
+        {
+          "slug": "context-update",
+          "branch": "context-update"
+        },
+        {
+          "slug": "closest-provider",
+          "branch": "closest-provider"
+        }
+      ]
+    },
+    {
+      "slug": "ref",
+      "title": "Ref",
+      "lessons": [
+        {
+          "slug": "create-ref",
+          "branch": "create-ref"
+        },
+        {
+          "slug": "forward-ref",
+          "branch": "forward-ref"
+        },
+        {
+          "slug": "forward-ref-multi",
+          "branch": "forward-ref-multi"
+        }
+      ]
+    },
+    {
+      "slug": "advanced",
+      "title": "Advanced",
+      "lessons": [
+        {
+          "slug": "gdsfp",
+          "branch": "gdsfp"
+        },
+        {
+          "slug": "gsbu",
+          "branch": "gsbu"
+        },
+        {
+          "slug": "react-children",
+          "branch": "react-children"
+        },
+        {
+          "slug": "catch-error",
+          "branch": "catch-error"
+        }
+      ]
+    }
+  ]
+}
