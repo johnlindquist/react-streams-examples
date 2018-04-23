@@ -1,55 +1,86 @@
 import React from "react"
-import { fromEvent, merge } from "rxjs"
+import { of, interval } from "rxjs"
 import { render } from "react-dom"
-import { pipeProps } from "react-streams"
+import { pipeProps, source } from "react-streams"
 import {
-  filter,
+  concat,
   map,
-  mapTo,
-  pluck,
+  repeatWhen,
   scan,
   startWith,
+  takeUntil,
+  takeWhile,
+  share,
+  ignoreElements,
   tap,
-  throttleTime,
   withLatestFrom
 } from "rxjs/operators"
 
-const deck = [
-  "Hi, I'm John Lindquist",
-  "egghead.io founder",
-  "React + RxJS",
-  '"Badass: Making Users Awesome" - Kathy Sierra',
-  "Perceptual Exposure",
-  "Your Brain Will Detect Patterns"
-]
+const Alarm = pipeProps(props$ => {
+  const snooze = source()
+  const dismiss = source()
 
-const Slides = pipeProps(props$ => {
-  const keys$ = fromEvent(window, "keydown").pipe(pluck("key"))
-
-  const next$ = keys$.pipe(
-    tap(() => console.log("next")),
-    filter(key => key === "ArrowRight"),
-    mapTo(deck => i => (i < deck.length - 1 ? i + 1 : deck.length - 1))
+  const countdown$ = interval(250).pipe(
+    startWith(5),
+    scan(time => time - 1),
+    takeWhile(time => time > 0)
   )
 
-  const prev$ = keys$.pipe(
-    filter(key => key === "ArrowLeft"),
-    mapTo(deck => i => (i > 0 ? i - 1 : 0))
+  const message$ = countdown$.pipe(
+    concat(of("Wake up! 🎉")),
+    repeatWhen(() => snooze.pipe(takeUntil(dismiss))),
+    concat(of("Have a nice day! 🤗"))
   )
 
-  const index$ = merge(next$, prev$).pipe(
-    throttleTime(250),
-    withLatestFrom(props$, (fn, { deck }) => fn(deck)),
-    startWith(0),
-    scan((acc, fn) => fn(acc))
+  const isSnoozeDisabled$ = countdown$.pipe(
+    ignoreElements(),
+    concat(of(false)),
+    startWith(true),
+    repeatWhen(() => snooze),
+    takeUntil(dismiss),
+    concat(of(true))
   )
 
-  const slide$ = index$.pipe(withLatestFrom(props$, (i, { deck }) => deck[i]))
+  const isDismissDisabled$ = isSnoozeDisabled$.pipe(
+    startWith(true),
+    takeUntil(dismiss),
+    concat(of(true))
+  )
 
-  return slide$.pipe(map(slide => ({ slide })))
+  return message$.pipe(
+    withLatestFrom(isSnoozeDisabled$, (message, isSnoozeDisabled) => ({
+      message,
+      isSnoozeDisabled
+    })),
+
+    withLatestFrom(isDismissDisabled$, (props, isDismissDisabled) => ({
+      ...props,
+      isDismissDisabled
+    })),
+
+    map(values => ({
+      ...values,
+      snooze,
+      dismiss
+    })),
+    tap(console.log.bind(console)),
+    share()
+  )
 })
 
 render(
-  <Slides deck={deck}>{props => <h1>{props.slide}</h1>}</Slides>,
+  <Alarm>
+    {props => (
+      <div>
+        <h2>{props.message}</h2>
+        <button disabled={props.isSnoozeDisabled} onClick={props.snooze}>
+          Snooze
+        </button>
+        <button disabled={props.isDismissDisabled} onClick={props.dismiss}>
+          Dismiss
+        </button>
+      </div>
+    )}
+  </Alarm>,
   document.querySelector("#root")
 )
