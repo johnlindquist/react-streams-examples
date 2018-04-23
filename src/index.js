@@ -1,43 +1,41 @@
 import React from "react"
-import { of, interval, combineLatest } from "rxjs"
+import { from, interval, combineLatest, merge } from "rxjs"
 import { render } from "react-dom"
 import { pipeProps, source } from "react-streams"
 import {
-  concat,
-  repeatWhen,
   scan,
   startWith,
-  takeUntil,
+  exhaustMap,
   takeWhile,
   share,
-  ignoreElements
+  mapTo,
+  filter
 } from "rxjs/operators"
 
 const Alarm = pipeProps(props$ => {
-  const snooze = source()
+  const snooze = source(startWith(7), mapTo(7))
   const dismiss = source()
 
-  const countdown$ = interval(250).pipe(
-    startWith(5),
-    scan(time => time - 1),
-    takeWhile(time => time > 0),
-    share()
+  const makeCountdown = start =>
+    interval(250).pipe(
+      startWith(start),
+      scan(time => time - 1),
+      takeWhile(time => time >= 0)
+    )
+
+  const countdown$ = from(snooze).pipe(exhaustMap(makeCountdown), share())
+
+  const zero$ = countdown$.pipe(filter(v => v === 0))
+
+  const message$ = merge(
+    countdown$,
+    zero$.pipe(mapTo("Wake up! 🎉")),
+    from(dismiss).pipe(mapTo("Have a nice day! 🤗"))
   )
 
-  const message$ = countdown$.pipe(
-    concat(of("Wake up! 🎉")),
-    repeatWhen(() => snooze),
-    takeUntil(dismiss),
-    concat(of("Have a nice day! 🤗"))
-  )
-
-  const areButtonsDisabled$ = countdown$.pipe(
-    ignoreElements(),
-    startWith(true),
-    concat(of(false)),
-    repeatWhen(() => snooze),
-    takeUntil(dismiss),
-    concat(of(true))
+  const areButtonsDisabled$ = merge(
+    merge(snooze, dismiss).pipe(mapTo(true)),
+    zero$.pipe(mapTo(false))
   )
 
   return combineLatest(
