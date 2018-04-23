@@ -1,19 +1,16 @@
 import React from "react"
-import { of, interval } from "rxjs"
+import { of, interval, combineLatest } from "rxjs"
 import { render } from "react-dom"
 import { pipeProps, source } from "react-streams"
 import {
   concat,
-  map,
   repeatWhen,
   scan,
   startWith,
   takeUntil,
   takeWhile,
   share,
-  ignoreElements,
-  tap,
-  withLatestFrom
+  ignoreElements
 } from "rxjs/operators"
 
 const Alarm = pipeProps(props$ => {
@@ -23,48 +20,35 @@ const Alarm = pipeProps(props$ => {
   const countdown$ = interval(250).pipe(
     startWith(5),
     scan(time => time - 1),
-    takeWhile(time => time > 0)
+    takeWhile(time => time > 0),
+    share()
   )
 
   const message$ = countdown$.pipe(
     concat(of("Wake up! 🎉")),
-    repeatWhen(() => snooze.pipe(takeUntil(dismiss))),
+    repeatWhen(() => snooze),
+    takeUntil(dismiss),
     concat(of("Have a nice day! 🤗"))
   )
 
-  const isSnoozeDisabled$ = countdown$.pipe(
+  const areButtonsDisabled$ = countdown$.pipe(
     ignoreElements(),
-    concat(of(false)),
     startWith(true),
+    concat(of(false)),
     repeatWhen(() => snooze),
     takeUntil(dismiss),
     concat(of(true))
   )
 
-  const isDismissDisabled$ = isSnoozeDisabled$.pipe(
-    startWith(true),
-    takeUntil(dismiss),
-    concat(of(true))
-  )
-
-  return message$.pipe(
-    withLatestFrom(isSnoozeDisabled$, (message, isSnoozeDisabled) => ({
+  return combineLatest(
+    message$,
+    areButtonsDisabled$,
+    (message, areButtonsDisabled) => ({
       message,
-      isSnoozeDisabled
-    })),
-
-    withLatestFrom(isDismissDisabled$, (props, isDismissDisabled) => ({
-      ...props,
-      isDismissDisabled
-    })),
-
-    map(values => ({
-      ...values,
+      areButtonsDisabled,
       snooze,
       dismiss
-    })),
-    tap(console.log.bind(console)),
-    share()
+    })
   )
 })
 
@@ -73,10 +57,10 @@ render(
     {props => (
       <div>
         <h2>{props.message}</h2>
-        <button disabled={props.isSnoozeDisabled} onClick={props.snooze}>
+        <button disabled={props.areButtonsDisabled} onClick={props.snooze}>
           Snooze
         </button>
-        <button disabled={props.isDismissDisabled} onClick={props.dismiss}>
+        <button disabled={props.areButtonsDisabled} onClick={props.dismiss}>
           Dismiss
         </button>
       </div>
