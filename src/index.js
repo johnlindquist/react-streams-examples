@@ -1,9 +1,8 @@
 import React, { Fragment } from "react"
 import { render } from "react-dom"
 import { pipeProps, source } from "react-streams"
-import { combineLatest, merge, interval, of, from } from "rxjs"
+import { combineLatest, merge, from } from "rxjs"
 import {
-  distinctUntilChanged,
   pluck,
   mergeScan,
   map,
@@ -16,7 +15,6 @@ import {
 
 const Stepper = pipeProps(
   mergeScan((acc = {}, { defaultValue, step, min, max }) => {
-    console.log(step, min, max)
     const onDec = source(mapTo(v => v - step))
     const onInc = source(mapTo(v => v + step))
     const onChange = source(pluck("target", "value"), map(x => () => x))
