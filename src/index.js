@@ -1,41 +1,31 @@
-//#region imports
 import React from "react"
 import { render } from "react-dom"
 import { pipeProps, source } from "react-streams"
-import { from, of } from "rxjs"
-import {
-  map,
-  startWith,
-  switchMap,
-  scan
-} from "rxjs/operators"
-//#endregion
-const Toggle = pipeProps(
-  switchMap(props => {
-    const change = source(
-      startWith(props.on),
-      scan(on => !on)
-    )
+import { merge } from "rxjs"
+import { map, scan } from "rxjs/operators"
 
-    return change.pipe(map(on => ({ on, change })))
-  })
-)
+const Toggle = pipeProps(props$ => {
+  const check = source(
+    map(event => ({ on: event.target.checked }))
+  )
+
+  return merge(props$, check).pipe(
+    scan((prevProps, nextProps) => nextProps),
+    map(props => ({ ...props, check }))
+  )
+})
 
 render(
   <Toggle on={true}>
-    {props => (
+    {({ on, check }) => (
       <div>
         <input
           type="checkbox"
-          checked={props.on}
-          onChange={props.change}
+          checked={on}
+          onChange={check}
         />
-        <h1 onClick={props.change}>
-          {JSON.stringify(props.on)}
-        </h1>
-        <h2 onMouseOver={props.change}>
-          {props.on ? "On" : "Off"}
-        </h2>
+        <h1>{JSON.stringify(on)}</h1>
+        <h1>{on ? "ON" : "OFF"}</h1>
       </div>
     )}
   </Toggle>,
