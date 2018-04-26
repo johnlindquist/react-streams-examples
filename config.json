@@ -5,8 +5,8 @@
       "title": "intro",
       "lessons": [
         {
-          "slug": "master",
-          "branch": "master"
+          "slug": "hello-world",
+          "branch": "hello-world"
         }
       ]
     },
