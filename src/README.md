@@ -1,1 +1,1 @@
-# Ajax Component
+# Load Next
