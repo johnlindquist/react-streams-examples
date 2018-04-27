@@ -55,10 +55,6 @@
         {
           "slug": "stepper-control",
           "branch": "stepper-control"
-        },
-        {
-          "slug": "catch-errors",
-          "branch": "catch-errors"
         }
       ]
     },
@@ -69,10 +65,6 @@
         {
           "slug": "snooze",
           "branch": "snooze"
-        },
-        {
-          "slug": "catch-errors",
-          "branch": "catch-errors"
         }
       ]
     }
