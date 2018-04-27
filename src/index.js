@@ -16,52 +16,55 @@ import {
   share,
   mapTo,
   filter,
-  switchMap
+  switchMap,
+  takeUntil,
+  last
 } from "rxjs/operators"
 //#endregion
 const Alarm = pipeProps(
   switchMap(({ start }) => {
-    const snooze = source(
-      startWith(start),
-      mapTo(start)
-    )
+    const snooze = source()
     const dismiss = source()
 
     const makeCountdown = start =>
-      interval(250).pipe(
+      interval(500).pipe(
         startWith(start),
-        scan(time => time - 1),
-        takeWhile(time => time >= 0)
+        scan(count => count - 1),
+        takeWhile(count => count >= 0),
+        share()
       )
 
-    const countdown$ = from(snooze).pipe(
-      exhaustMap(makeCountdown),
-      share()
+    const snooze$ = from(snooze).pipe(
+      takeUntil(dismiss),
+      startWith(start),
+      mapTo(start),
+      exhaustMap(makeCountdown)
     )
 
-    const zero$ = countdown$.pipe(
-      filter(v => v === 0)
+    const zero$ = snooze$.pipe(
+      filter(count => count === 0)
+    )
+
+    const disabled$ = merge(
+      merge(snooze$, dismiss).pipe(mapTo(true)),
+      zero$.pipe(mapTo(false))
     )
 
     const message$ = merge(
-      countdown$,
-      zero$.pipe(mapTo("Wake up! 🎉")),
-      from(dismiss).pipe(
-        mapTo("Have a nice day! 🤗")
+      snooze$,
+      zero$.pipe(mapTo(`Wakeup! 🤗`)),
+      snooze$.pipe(
+        last(),
+        mapTo(`Have a great day! 🎉`)
       )
-    )
-
-    const areButtonsDisabled$ = merge(
-      merge(snooze, dismiss).pipe(mapTo(true)),
-      zero$.pipe(mapTo(false))
     )
 
     return combineLatest(
       message$,
-      areButtonsDisabled$,
-      (message, areButtonsDisabled) => ({
+      disabled$,
+      (message, disabled) => ({
         message,
-        areButtonsDisabled,
+        disabled,
         snooze,
         dismiss
       })
@@ -71,18 +74,18 @@ const Alarm = pipeProps(
 
 render(
   <Alarm start={7}>
-    {props => (
+    {({ message, disabled, snooze, dismiss }) => (
       <div>
-        <h2>{props.message}</h2>
+        <h2>{message}</h2>
         <button
-          disabled={props.areButtonsDisabled}
-          onClick={props.snooze}
+          disabled={disabled}
+          onClick={snooze}
         >
           Snooze
         </button>
         <button
-          disabled={props.areButtonsDisabled}
-          onClick={props.dismiss}
+          disabled={disabled}
+          onClick={dismiss}
         >
           Dismiss
         </button>
