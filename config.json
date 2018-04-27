@@ -11,22 +11,50 @@
       ]
     },
     {
-      "slug": "source",
-      "title": "source",
-      "lessons": [
-        {
-          "slug": "source",
-          "branch": "source"
-        }
-      ]
-    },
-    {
       "slug": "ajax",
       "title": "ajax",
       "lessons": [
         {
           "slug": "ajax",
           "branch": "ajax"
+        }
+      ]
+    },
+    {
+      "slug": "source",
+      "title": "source",
+      "lessons": [
+        {
+          "slug": "ajax-load",
+          "branch": "ajax-load"
+        },
+        {
+          "slug": "catch-errors",
+          "branch": "catch-errors"
+        }
+      ]
+    },
+    {
+      "slug": "toggle",
+      "title": "toggle",
+      "lessons": [
+        {
+          "slug": "toggle-checkbox",
+          "branch": "toggle-checkbox"
+        },
+        {
+          "slug": "catch-errors",
+          "branch": "catch-errors"
+        }
+      ]
+    },
+    {
+      "slug": "stepper",
+      "title": "stepper",
+      "lessons": [
+        {
+          "slug": "stepper-control",
+          "branch": "stepper-control"
         },
         {
           "slug": "catch-errors",
