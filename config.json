@@ -63,8 +63,8 @@
       "title": "snooze",
       "lessons": [
         {
-          "slug": "snooze",
-          "branch": "snooze"
+          "slug": "snooze-click",
+          "branch": "snooze-click"
         }
       ]
     }
