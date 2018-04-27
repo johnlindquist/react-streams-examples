@@ -61,6 +61,20 @@
           "branch": "catch-errors"
         }
       ]
+    },
+    {
+      "slug": "snooze",
+      "title": "snooze",
+      "lessons": [
+        {
+          "slug": "snooze",
+          "branch": "snooze"
+        },
+        {
+          "slug": "catch-errors",
+          "branch": "catch-errors"
+        }
+      ]
     }
   ]
 }
