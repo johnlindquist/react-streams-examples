@@ -27,10 +27,6 @@
         {
           "slug": "ajax-load",
           "branch": "ajax-load"
-        },
-        {
-          "slug": "catch-errors",
-          "branch": "catch-errors"
         }
       ]
     },
@@ -41,10 +37,6 @@
         {
           "slug": "toggle-checkbox",
           "branch": "toggle-checkbox"
-        },
-        {
-          "slug": "catch-errors",
-          "branch": "catch-errors"
         }
       ]
     },
