@@ -1,32 +1,27 @@
 import React from "react"
 import { render } from "react-dom"
-import { pipeProps, source } from "react-streams"
-import {
-  first,
-  map,
-  scan,
-  switchMap
-} from "rxjs/operators"
+import { source, streamProps } from "react-streams"
+import { concat, of } from "rxjs"
 import { ajax } from "rxjs/ajax"
-import { merge } from "rxjs"
+import { pluck, scan, switchMap } from "rxjs/operators"
 
 const URL = `https://swapi.glitch.me`
 
-const StarWars = pipeProps(props$ => {
+const StarWars = streamProps(({ url, type, id }) => {
   const onClick = source()
 
-  return merge(props$.pipe(first()), onClick).pipe(
-    scan(props => ({ ...props, id: props.id + 1 })),
-    switchMap(({ url, type, id }) =>
-      ajax(`${url}/${type}/${id}`).pipe(
-        map(({ response }) => ({
-          person: response,
-          url,
-          onClick
-        }))
-      )
-    )
+  const id$ = concat(of(id), onClick).pipe(scan(id => id + 1))
+
+  const person$ = id$.pipe(
+    switchMap(id => ajax(`${url}/${type}/${id}`)),
+    pluck("response")
   )
+
+  return {
+    person: person$,
+    url: of(url),
+    onClick
+  }
 })
 
 render(
@@ -35,10 +30,7 @@ render(
       <div>
         <button onClick={onClick}>Load Next</button>
         <h1>{person.name}</h1>
-        <img
-          src={`${url}/${person.image}`}
-          alt={person.name}
-        />
+        <img src={`${url}/${person.image}`} alt={person.name} />
       </div>
     )}
   </StarWars>,
