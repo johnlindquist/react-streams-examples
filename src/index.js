@@ -3,7 +3,7 @@ import { render } from "react-dom"
 import { source, streamProps } from "react-streams"
 import { concat, of } from "rxjs"
 import { ajax } from "rxjs/ajax"
-import { pluck, scan, switchMap } from "rxjs/operators"
+import { catchError, pluck, scan, switchMap } from "rxjs/operators"
 
 const URL = `https://swapi.glitch.me`
 
@@ -13,8 +13,12 @@ const StarWars = streamProps(({ url, type, id }) => {
   const id$ = concat(of(id), onClick).pipe(scan(id => id + 1))
 
   const person$ = id$.pipe(
-    switchMap(id => ajax(`${url}/${type}/${id}`)),
-    pluck("response")
+    switchMap(id =>
+      ajax(`${url}/${type}/${id}`).pipe(
+        pluck("response"),
+        catchError(() => of({ name: "Missing...", image: "none" }))
+      )
+    )
   )
 
   return {
