@@ -14,12 +14,12 @@ import { map, mergeScan } from "rxjs/operators"
 const Stepper = pipeProps(
   /***
    * mergeScan because we want the current streamed stepper "value"
-   * instead of the props' "defaultValue"
+   * instead of the  "defaultValue"
    */
   mergeScan((acc = {}, { defaultValue, step, min, max }) => {
     const onDec = handler()
     const onInc = handler()
-    const onChange = handler(getTargetValue)
+    const onChange = handler(map(e => Number(e.target.value)))
 
     const { value } = acc
 
@@ -32,7 +32,7 @@ const Stepper = pipeProps(
       //clamp on the action so the clamped value is stored in the "state"
       action(onDec, () => value => clamp(value - step)),
       action(onInc, () => value => clamp(value + step)),
-      action(onChange, value => () => clamp(value))
+      action(onChange, value => () => value)
     ])
 
     return value$.pipe(
@@ -46,79 +46,84 @@ const Stepper = pipeProps(
   })
 )
 
-const App = streamProps(({ min, max, step }) => {
-  const updateMin = handler(map(e => Number(e.target.value)))
-  const updateMax = handler(map(e => Number(e.target.value)))
-  const updateStep = handler(map(e => Number(e.target.value)))
+const StepperControl = streamProps(({ min, max, step }) => {
+  const onUpdateMin = handler(map(e => Number(e.target.value)))
+  const onUpdateMax = handler(map(e => Number(e.target.value)))
+  const onUpdateStep = handler(map(e => Number(e.target.value)))
+  const onUpdateValue = handler(map(e => Number(e.target.value)))
 
   const min$ = streamActions(of(min), [
-    action(updateMin, value => () => value),
-    action(updateMax, value => current => Math.min(value, current))
+    action(onUpdateMin, value => () => value),
+    action(onUpdateMax, value => current => Math.min(value, current)),
+    action(onUpdateValue, value => current => Math.min(value, current))
   ])
 
   const max$ = streamActions(of(max), [
-    action(updateMin, value => current => Math.max(value, current)),
-    action(updateMax, value => () => value)
+    action(onUpdateMin, value => current => Math.max(value, current)),
+    action(onUpdateValue, value => current => Math.max(value, current)),
+    action(onUpdateMax, value => () => value)
   ])
 
   const step$ = streamActions(of(step), [
-    action(updateStep, value => () => value)
+    action(onUpdateStep, value => () => value)
   ])
 
   return {
     min: min$,
     max: max$,
     step: step$,
-    updateMin,
-    updateMax,
-    updateStep
+    onUpdateMin,
+    onUpdateMax,
+    onUpdateStep,
+    onUpdateValue
   }
 })
 
 render(
-  <App min={4} max={18} step={1}>
-    {props => (
+  <StepperControl min={4} max={18} step={1}>
+    {({
+      min,
+      max,
+      step,
+      onUpdateMin,
+      onUpdateMax,
+      onUpdateStep,
+      onUpdateValue
+    }) => (
       <Fragment>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <label>
-            min:{" "}
-            <input type="number" value={props.min} onChange={props.updateMin} />
+            min: <input type="number" value={min} onChange={onUpdateMin} />
           </label>
           <label>
-            max:{" "}
-            <input type="number" value={props.max} onChange={props.updateMax} />
+            max: <input type="number" value={max} onChange={onUpdateMax} />
           </label>
           <label>
-            step:{" "}
-            <input
-              type="number"
-              value={props.step}
-              onChange={props.updateStep}
-            />
+            step: <input type="number" value={step} onChange={onUpdateStep} />
           </label>
         </div>
-        <Stepper
-          defaultValue={10}
-          min={props.min}
-          max={props.max}
-          step={props.step}
-        >
+        <Stepper defaultValue={10} min={min} max={max} step={step}>
           {({ onDec, value, onBlur, onInc, onChange }) => (
             <div>
-              <button onClick={onDec}>-</button>
+              <button onClick={onDec} aria-label="Increment value">
+                -
+              </button>
               <input
                 style={{ width: "1rem" }}
                 value={value}
+                onBlur={onUpdateValue}
                 onChange={onChange}
-                onBlur={onBlur}
                 type="text"
+                aria-label="Set value"
               />
-              <button onClick={onInc}>+</button>
+              <button onClick={onInc} aria-label="Decrement value">
+                +
+              </button>
             </div>
           )}
         </Stepper>
       </Fragment>
     )}
-  </App>,
+  </StepperControl>,
   document.querySelector("#root")
 )
