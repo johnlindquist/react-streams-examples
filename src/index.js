@@ -1,8 +1,7 @@
-import React, { Fragment } from "react"
+import React from "react"
 import { render } from "react-dom"
 import {
   action,
-  getTargetValue,
   handler,
   pipeProps,
   streamActions,
@@ -10,41 +9,6 @@ import {
 } from "react-streams"
 import { of } from "rxjs"
 import { map, mergeScan } from "rxjs/operators"
-
-const Stepper = pipeProps(
-  /***
-   * mergeScan because we want the current streamed stepper "value"
-   * instead of the  "defaultValue"
-   */
-  mergeScan((acc = {}, { defaultValue, step, min, max }) => {
-    const onDec = handler()
-    const onInc = handler()
-    const onChange = handler(map(e => Number(e.target.value)))
-
-    const { value } = acc
-
-    const clamp = value => (value > max ? max : value < min ? min : value)
-
-    //clamping on the initial check allows the min/max to force the value down/up
-    const checkValue = value => clamp(!value ? defaultValue : value)
-
-    const value$ = streamActions(of(checkValue(value)), [
-      //clamp on the action so the clamped value is stored in the "state"
-      action(onDec, () => value => clamp(value - step)),
-      action(onInc, () => value => clamp(value + step)),
-      action(onChange, value => () => value)
-    ])
-
-    return value$.pipe(
-      map(value => ({
-        value,
-        onDec,
-        onInc,
-        onChange
-      }))
-    )
-  })
-)
 
 const StepperControl = streamProps(({ min, max, step }) => {
   const onUpdateMin = handler(map(e => Number(e.target.value)))
@@ -78,6 +42,43 @@ const StepperControl = streamProps(({ min, max, step }) => {
     onUpdateValue
   }
 })
+const Stepper = pipeProps(
+  /***
+   * mergeScan because we want the current streamed stepper "value"
+   * instead of the  "defaultValue"
+   */
+  mergeScan((acc = {}, { defaultValue, step, min, max }) => {
+    const onDec = handler()
+    const onInc = handler()
+    const onChange = handler(map(e => Number(e.target.value)))
+
+    const { value } = acc
+
+    const clamp = value => (value > max ? max : value < min ? min : value)
+
+    //clamping on the initial check allows the min/max to force the value down/up
+    const checkValue = value => clamp(!value ? defaultValue : value)
+
+    const value$ = streamActions(of(checkValue(value)), [
+      //prevent going above or below the max/min
+      action(onDec, () => value => (value - step < min ? value : value - step)),
+      action(onInc, () => value => (value + step > max ? value : value + step)),
+      action(onChange, value => () => value)
+    ])
+
+    return value$.pipe(
+      map(value => ({
+        value,
+        onDec,
+        onInc,
+        onChange,
+        min,
+        max,
+        step
+      }))
+    )
+  })
+)
 
 render(
   <StepperControl min={4} max={18} step={1}>
@@ -90,7 +91,7 @@ render(
       onUpdateStep,
       onUpdateValue
     }) => (
-      <Fragment>
+      <div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <label>
             min: <input type="number" value={min} onChange={onUpdateMin} />
@@ -103,7 +104,7 @@ render(
           </label>
         </div>
         <Stepper defaultValue={10} min={min} max={max} step={step}>
-          {({ onDec, value, onBlur, onInc, onChange }) => (
+          {({ onDec, value, onBlur, onInc, onChange, min, max, step }) => (
             <div>
               <button onClick={onDec} aria-label="Increment value">
                 -
@@ -119,10 +120,20 @@ render(
               <button onClick={onInc} aria-label="Decrement value">
                 +
               </button>
+              <br />
+              {/* A Range input forces the "value" to be "min" + multiple of "step" */}
+              <input
+                type="range"
+                min={min}
+                max={max}
+                step={step}
+                value={value}
+                onChange={onChange}
+              />
             </div>
           )}
         </Stepper>
-      </Fragment>
+      </div>
     )}
   </StepperControl>,
   document.querySelector("#root")
