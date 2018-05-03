@@ -24,9 +24,12 @@ const Stepper = pipeProps(
     const { value } = acc
 
     const clamp = value => (value > max ? max : value < min ? min : value)
-    const checkValue = value => (!value ? defaultValue : clamp(value))
+
+    //clamping on the initial check allows the min/max to force the value down/up
+    const checkValue = value => clamp(!value ? defaultValue : value)
 
     const value$ = streamActions(of(checkValue(value)), [
+      //clamp on the action so the clamped value is stored in the "state"
       action(onDec, () => value => clamp(value - step)),
       action(onInc, () => value => clamp(value + step)),
       action(onChange, value => () => clamp(value))
