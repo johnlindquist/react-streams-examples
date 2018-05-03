@@ -1,43 +1,40 @@
 import React, { Fragment } from "react"
 import { render } from "react-dom"
-import { pipeProps, source } from "react-streams"
-import { combineLatest, merge, from } from "rxjs"
 import {
-  pluck,
-  mergeScan,
-  map,
-  mapTo,
-  startWith,
-  switchMap,
-  scan,
-  withLatestFrom
-} from "rxjs/operators"
+  action,
+  getTargetValue,
+  handler,
+  pipeProps,
+  streamActions,
+  streamProps
+} from "react-streams"
+import { of } from "rxjs"
+import { map, mergeScan } from "rxjs/operators"
 
 const Stepper = pipeProps(
+  /***
+   * mergeScan because we want the current streamed stepper "value"
+   * instead of the props' "defaultValue"
+   */
   mergeScan((acc = {}, { defaultValue, step, min, max }) => {
-    const onDec = source(mapTo(v => v - step))
-    const onInc = source(mapTo(v => v + step))
-    const onChange = source(pluck("target", "value"), map(x => () => x))
+    const onDec = handler()
+    const onInc = handler()
+    const onChange = handler(getTargetValue)
+
+    const { value } = acc
 
     const clamp = value => (value > max ? max : value < min ? min : value)
+    const checkValue = value => (!value ? defaultValue : clamp(value))
 
-    const { value, prevDefaultValue } = acc
-    const checkValue = value
-      ? value > max
-        ? max
-        : value < min
-          ? min
-          : value
-      : defaultValue !== prevDefaultValue
-        ? defaultValue
-        : prevDefaultValue
+    const value$ = streamActions(of(checkValue(value)), [
+      action(onDec, () => value => clamp(value - step)),
+      action(onInc, () => value => clamp(value + step)),
+      action(onChange, value => () => clamp(value))
+    ])
 
-    return merge(onDec, onInc, onChange).pipe(
-      startWith(checkValue),
-      scan((acc, fn) => clamp(fn(acc))),
+    return value$.pipe(
       map(value => ({
         value,
-        prevDefaultValue: defaultValue,
         onDec,
         onInc,
         onChange
@@ -46,43 +43,34 @@ const Stepper = pipeProps(
   })
 )
 
-const App = pipeProps(
-  switchMap(props => {
-    const updateMin = source(
-      pluck("target", "value"),
-      map(value => Number(value)),
-      startWith(props.min)
-    )
-    const updateMax = source(
-      pluck("target", "value"),
-      map(value => Number(value)),
-      startWith(props.max)
-    )
-    const updateStep = source(
-      pluck("target", "value"),
-      map(value => Number(value)),
-      startWith(props.step)
-    )
+const App = streamProps(({ min, max, step }) => {
+  const updateMin = handler(map(e => Number(e.target.value)))
+  const updateMax = handler(map(e => Number(e.target.value)))
+  const updateStep = handler(map(e => Number(e.target.value)))
 
-    const validMin$ = from(updateMin).pipe(withLatestFrom(updateMax, Math.min))
+  const min$ = streamActions(of(min), [
+    action(updateMin, value => () => value),
+    action(updateMax, value => current => Math.min(value, current))
+  ])
 
-    const validMax$ = from(updateMax).pipe(withLatestFrom(updateMin, Math.max))
+  const max$ = streamActions(of(max), [
+    action(updateMin, value => current => Math.max(value, current)),
+    action(updateMax, value => () => value)
+  ])
 
-    return combineLatest(
-      validMin$,
-      validMax$,
-      updateStep,
-      (min, max, step) => ({
-        min,
-        max,
-        step,
-        updateMin,
-        updateMax,
-        updateStep
-      })
-    )
-  })
-)
+  const step$ = streamActions(of(step), [
+    action(updateStep, value => () => value)
+  ])
+
+  return {
+    min: min$,
+    max: max$,
+    step: step$,
+    updateMin,
+    updateMax,
+    updateStep
+  }
+})
 
 render(
   <App min={4} max={18} step={1}>
