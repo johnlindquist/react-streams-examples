@@ -1,27 +1,12 @@
 import React from "react"
 import { render } from "react-dom"
-import { streamState, streamActions, action, handler } from "react-streams"
-import { of } from "rxjs"
+import CountState from "./CountState"
 
-const CountState = streamState({ count: 1 })(({ count }) => {
-  const onInc = handler()
-  const onDec = handler()
-
-  const count$ = streamActions(of(count), [
-    action(onInc, () => count => count + 1),
-    action(onDec, () => count => count - 1)
-  ])
-
-  return {
-    count: count$,
-    onInc,
-    onDec
-  }
-})
+const CountStateComp = CountState({ count: 5 })
 
 const App = () => (
   <div>
-    <CountState>
+    <CountStateComp>
       {({ count, onInc, onDec }) => (
         <div>
           <h2>{count}</h2>
@@ -29,20 +14,20 @@ const App = () => (
           <button onClick={onDec}>-</button>
         </div>
       )}
-    </CountState>
+    </CountStateComp>
     <div>
       <div>
         <div>
           <div>
-            <CountState>
+            <CountStateComp>
               {({ count, onInc, onDec }) => (
                 <div>
-                  <h2>{count}</h2>
-                  <button onClick={onInc}>+</button>
-                  <button onClick={onDec}>-</button>
+                  <h3>I'm deep in the app: {count}</h3>
+                  <button onMouseMove={onInc}>MouseMove to Inc</button>
+                  <button onMouseMove={onDec}>MouseMove to Dec</button>
                 </div>
               )}
-            </CountState>
+            </CountStateComp>
           </div>
         </div>
       </div>
