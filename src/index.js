@@ -1,33 +1,43 @@
 import React from "react"
 import { render } from "react-dom"
 import CountState from "./CountState"
+import NameState from "./NameState"
+import { combineStateStreams } from "react-streams"
 
-const CountStateComp = CountState({ count: 5 })
+const CountAndName = combineStateStreams(
+  CountState({ count: 5 }),
+  NameState({ name: "John" })
+)
 
 const App = () => (
   <div>
-    <CountStateComp>
-      {({ count, onInc, onDec }) => (
+    <CountAndName>
+      {({ count, onInc, onDec, name }) => (
         <div>
-          <h2>{count}</h2>
+          <h2>
+            {name} has {count} apples
+          </h2>
           <button onClick={onInc}>+</button>
           <button onClick={onDec}>-</button>
         </div>
       )}
-    </CountStateComp>
+    </CountAndName>
     <div>
       <div>
         <div>
           <div>
-            <CountStateComp>
-              {({ count, onInc, onDec }) => (
+            <CountAndName>
+              {({ count, onInc, onDec, name, onUpdate }) => (
                 <div>
                   <h3>I'm deep in the app: {count}</h3>
                   <button onMouseMove={onInc}>MouseMove to Inc</button>
                   <button onMouseMove={onDec}>MouseMove to Dec</button>
+
+                  <h2>{name}</h2>
+                  <input type="text" onChange={onUpdate} value={name} />
                 </div>
               )}
-            </CountStateComp>
+            </CountAndName>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
-import { streamState, streamActions, action, handler } from "react-streams"
+import { stateToStreams, streamActions, action, handler } from "react-streams"
 import { of } from "rxjs"
 
-export default streamState(({ count }) => {
+export default stateToStreams(({ count }) => {
   const onInc = handler()
   const onDec = handler()
 
