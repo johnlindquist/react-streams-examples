@@ -1,9 +1,9 @@
 import {
-  stateToStreams,
-  streamActions,
   action,
+  getTargetValue,
   handler,
-  getTargetValue
+  stateToStreams,
+  streamActions
 } from "react-streams"
 import { of } from "rxjs"
 

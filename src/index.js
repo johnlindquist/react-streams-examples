@@ -1,8 +1,8 @@
 import React from "react"
 import { render } from "react-dom"
+import { combineStateStreams } from "react-streams"
 import CountState from "./CountState"
 import NameState from "./NameState"
-import { combineStateStreams } from "react-streams"
 
 const CountAndName = combineStateStreams(
   CountState({ count: 5 }),

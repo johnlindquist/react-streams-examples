@@ -1,4 +1,4 @@
-import { stateToStreams, streamActions, action, handler } from "react-streams"
+import { action, handler, stateToStreams, streamActions } from "react-streams"
 import { of } from "rxjs"
 
 export default stateToStreams(({ count }) => {
